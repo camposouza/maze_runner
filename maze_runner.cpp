@@ -65,6 +65,12 @@ void print_maze() {
     // 1. Percorra a matriz 'maze' usando um loop aninhado
     // 2. Imprima cada caractere usando std::cout
     // 3. Adicione uma quebra de linha (std::cout << '\n') ao final de cada linha do labirinto
+    for(int i = 0; i < num_rows; i++) {
+        for(int j = 0; j < num_cols; j++) {
+            std::cout << maze[i][j] << " ";
+        }
+        std::cout << '\n';
+    }
 }
 
 // Função para verificar se uma posição é válida
