@@ -72,7 +72,7 @@ void print_maze() {
 
 // Função para verificar se uma posição é válida
 bool is_valid_position(int row, int col) {
-    
+
     if (row >= 0 && row < num_rows && col >= 0 && col < num_cols) {
         if (maze[row][col] == 'x') {
             return true;
@@ -83,23 +83,43 @@ bool is_valid_position(int row, int col) {
 
 // Função principal para navegar pelo labirinto
 bool walk(Position pos) {
-    // TODO: Implemente a lógica de navegação aqui
-    // 1. Marque a posição atual como visitada (maze[pos.row][pos.col] = '.')
-    // 2. Chame print_maze() para mostrar o estado atual do labirinto
-    // 3. Adicione um pequeno atraso para visualização:
-    //    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    // 4. Verifique se a posição atual é a saída (maze[pos.row][pos.col] == 's')
-    //    Se for, retorne true
-    // 5. Verifique as posições adjacentes (cima, baixo, esquerda, direita)
-    //    Para cada posição adjacente:
-    //    a. Se for uma posição válida (use is_valid_position()), adicione-a à pilha valid_positions
-    // 6. Enquanto houver posições válidas na pilha (!valid_positions.empty()):
-    //    a. Remova a próxima posição da pilha (valid_positions.top() e valid_positions.pop())
-    //    b. Chame walk recursivamente para esta posição
-    //    c. Se walk retornar true, propague o retorno (retorne true)
-    // 7. Se todas as posições foram exploradas sem encontrar a saída, retorne false
-    
-    return false; // Placeholder - substitua pela lógica correta
+
+    // Marca a posicao atual como visitada
+    maze[pos.row][pos.col] = '.';
+
+    // Mostra o estado atual do labirinto
+    print_maze();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // Verifica se a posicao atual eh a saida
+    if(maze[pos.row][pos.col] == 's') return true;
+
+    // Verifica se as posicoes vizinhas sao validas
+    if(is_valid_position(pos.col-1, pos.row)) {
+        Position cima = {pos.col-1, pos.row};
+        valid_positions.push(cima);
+    }
+    if(is_valid_position(pos.col-1, pos.row)) {
+        Position baixo = {pos.col+1, pos.row};
+        valid_positions.push(baixo);
+    }
+    if(is_valid_position(pos.col-1, pos.row)) {
+        Position esquerda = {pos.col, pos.row-11};
+        valid_positions.push(esquerda);
+    }
+    if(is_valid_position(pos.col-1, pos.row)) {
+        Position direita = {pos.col, pos.row+1};
+        valid_positions.push(direita);
+    }
+
+    while(!valid_positions.empty()) {
+        Position next_pos = valid_positions.top();
+        valid_positions.pop();
+
+        if (walk(next_pos)) return true;
+    }
+
+    return false;
 }
 
 int main(int argc, char* argv[]) {
@@ -124,20 +144,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
-// Nota sobre o uso de std::this_thread::sleep_for:
-// 
-// A função std::this_thread::sleep_for é parte da biblioteca <thread> do C++11 e posteriores.
-// Ela permite que você pause a execução do thread atual por um período especificado.
-// 
-// Para usar std::this_thread::sleep_for, você precisa:
-// 1. Incluir as bibliotecas <thread> e <chrono>
-// 2. Usar o namespace std::chrono para as unidades de tempo
-// 
-// Exemplo de uso:
-// std::this_thread::sleep_for(std::chrono::milliseconds(50));
-// 
-// Isso pausará a execução por 50 milissegundos.
-// 
-// Você pode ajustar o tempo de pausa conforme necessário para uma melhor visualização
-// do processo de exploração do labirinto.
