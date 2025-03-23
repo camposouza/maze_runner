@@ -74,7 +74,7 @@ void print_maze() {
 bool is_valid_position(int row, int col) {
 
     if (row >= 0 && row < num_rows && col >= 0 && col < num_cols) {
-        if (maze[row][col] == 'x') {
+        if (maze[row][col] == 'x' || maze[row][col] == 's') {
             return true;
         }
     }
@@ -83,7 +83,6 @@ bool is_valid_position(int row, int col) {
 
 // Função principal para navegar pelo labirinto
 bool walk(Position pos) {
-
     // Marca a posicao atual como visitada
     maze[pos.row][pos.col] = '.';
 
@@ -95,26 +94,30 @@ bool walk(Position pos) {
     if(maze[pos.row][pos.col] == 's') return true;
 
     // Verifica se as posicoes vizinhas sao validas
-    if(is_valid_position(pos.col-1, pos.row)) {
-        Position cima = {pos.col-1, pos.row};
+    if(is_valid_position(pos.row-1, pos.col)) {
+        Position cima = {pos.row-1, pos.col};
         valid_positions.push(cima);
     }
-    if(is_valid_position(pos.col-1, pos.row)) {
-        Position baixo = {pos.col+1, pos.row};
+    if(is_valid_position(pos.row+1, pos.col)) {
+        Position baixo = {pos.row+1, pos.col};
         valid_positions.push(baixo);
     }
-    if(is_valid_position(pos.col-1, pos.row)) {
-        Position esquerda = {pos.col, pos.row-11};
+    if(is_valid_position(pos.row, pos.col-1)) {
+        Position esquerda = {pos.row, pos.col-1};
         valid_positions.push(esquerda);
     }
-    if(is_valid_position(pos.col-1, pos.row)) {
-        Position direita = {pos.col, pos.row+1};
+    if(is_valid_position(pos.row, pos.col+1)) {
+        Position direita = {pos.row, pos.col+1};
         valid_positions.push(direita);
     }
 
+    // Enquanto houver posicoes validas, repita
     while(!valid_positions.empty()) {
         Position next_pos = valid_positions.top();
         valid_positions.pop();
+
+        // Limpa o terminal
+        system("clear");
 
         if (walk(next_pos)) return true;
     }
@@ -134,6 +137,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    int i = 0;
     bool exit_found = walk(initial_pos);
 
     if (exit_found) {
