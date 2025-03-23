@@ -74,7 +74,7 @@ void print_maze() {
 bool is_valid_position(int row, int col) {
 
     if (row >= 0 && row < num_rows && col >= 0 && col < num_cols) {
-        if (maze[row][col] == 'x' || maze[row][col] == 's') {
+        if (maze[row][col] == 'x') {
             return true;
         }
     }
