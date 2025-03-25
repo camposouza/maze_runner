@@ -74,7 +74,10 @@ void print_maze() {
 bool is_valid_position(int row, int col) {
 
     if (row >= 0 && row < num_rows && col >= 0 && col < num_cols) {
-        if (maze[row][col] == 'x') {
+
+        // A saída também deve ser considerada uma posição válida, senão
+        // nunca será chamado o walk() estando nela
+        if (maze[row][col] == 'x' || maze[row][col] == 's') {
             return true;
         }
     }
@@ -83,6 +86,14 @@ bool is_valid_position(int row, int col) {
 
 // Função principal para navegar pelo labirinto
 bool walk(Position pos) {
+
+    // Verifica se a posicao atual eh a saida e guarda o resultado
+    bool is_exit;
+    if(maze[pos.row][pos.col] == 's') {
+        is_exit = true;
+    }
+    else is_exit = false;
+
     // Marca a posicao atual como visitada
     maze[pos.row][pos.col] = '.';
 
@@ -90,8 +101,10 @@ bool walk(Position pos) {
     print_maze();
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-    // Verifica se a posicao atual eh a saida
-    if(maze[pos.row][pos.col] == 's') return true;
+    // Termina a execucao se e somente se a posicao atual eh a saida
+    // (isso implica que, em algum momento, precisamos passar pela posição da saída,
+    // então ela precisa ser considerada uma posição válida)
+    if(is_exit) return true;    
 
     // Verifica se as posicoes vizinhas sao validas
     if(is_valid_position(pos.row-1, pos.col)) {
