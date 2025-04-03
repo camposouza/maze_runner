@@ -18,7 +18,7 @@ struct Position {
 Maze maze;
 int num_rows;
 int num_cols;
-std::stack<Position> valid_positions;
+bool exit_found = false; // Flag para indicar se a saída foi encontrada
 
 // Função para carregar o labirinto de um arquivo
 Position load_maze(const std::string& file_name) {
@@ -85,28 +85,21 @@ bool is_valid_position(int row, int col) {
 }
 
 // Função principal para navegar pelo labirinto
-bool walk(Position pos) {
+void walk(Position pos) {
 
-    // Verifica se a posicao atual eh a saida e guarda o resultado
-    bool is_exit;
-    if(maze[pos.row][pos.col] == 's') {
-        is_exit = true;
-    }
-    else is_exit = false;
-
-    // Marca a posicao atual como visitada
-    maze[pos.row][pos.col] = '.';
-
-    // Mostra o estado atual do labirinto
-    print_maze();
+    // Ajuda na impressão do labirinto
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-    // Termina a execucao se e somente se a posicao atual eh a saida
-    // (isso implica que, em algum momento, precisamos passar pela posição da saída,
-    // então ela precisa ser considerada uma posição válida)
-    if(is_exit) return true;    
+    // Verifica se a posicao atual eh a saida e guarda o resultado
+    if(maze[pos.row][pos.col] == 's') {
+        exit_found = true;
+    }
 
+    // Marca a posicao atual como visitada
+    maze[pos.row][pos.col] = '.'; 
+     
     // Verifica se as posicoes vizinhas sao validas
+    std::stack<Position> valid_positions;
     if(is_valid_position(pos.row-1, pos.col)) {
         Position cima = {pos.row-1, pos.col};
         valid_positions.push(cima);
@@ -124,18 +117,27 @@ bool walk(Position pos) {
         valid_positions.push(direita);
     }
 
-    // Enquanto houver posicoes validas, repita
+    // Se houver mais de uma posição válida, cria thread para cada uma.
+    // Quando sobrar apenas uma posição válida, não cria mais threads
+    // (segue a thread principal)
     while(!valid_positions.empty()) {
-        Position next_pos = valid_positions.top();
-        valid_positions.pop();
 
-        // Limpa o terminal
-        system("clear");
+        // Se houver apenas uma posição válida, não abre thread adicional
+        if (valid_positions.size() == 1) {
+            Position next_pos = valid_positions.top();
+            valid_positions.pop();
+            walk(next_pos); // Chama a função walk recursivamente
+        }
+        else {
+            Position next_pos = valid_positions.top();
+            valid_positions.pop();
 
-        if (walk(next_pos)) return true;
+            // Cria nova thread para seguir por esse caminho
+            std::thread t([next_pos]() { 
+                walk(next_pos);
+            });
+            t.detach();} 
     }
-
-    return false;
 }
 
 int main(int argc, char* argv[]) {
@@ -150,8 +152,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int i = 0;
-    bool exit_found = walk(initial_pos);
+    std::thread t(walk, initial_pos);
+	t.detach();
+
+	while(!exit_found){
+        print_maze();
+		std::this_thread::sleep_for(std::chrono::milliseconds(45));
+        system("clear");
+    }
+    print_maze();
 
     if (exit_found) {
         std::cout << "Saída encontrada!" << std::endl;
